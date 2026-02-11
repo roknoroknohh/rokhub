@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="py-12">
+    <div class="max-w-2xl mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-8 text-center">دعم وإبلاغ</h1>
+        
+        <div class="bg-gray-800 rounded-xl p-6 mb-6">
+            <p class="text-gray-300 mb-4 text-center">يمكنك إرسال رسالتك هنا وسيتم التواصل معك عبر Instagram</p>
+            
+            <form method="post" class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2">الاسم</label>
+                    <input type="text" name="name" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-3 px-4 text-right" required>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">البريد الإلكتروني (اختياري)</label>
+                    <input type="email" name="email" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-3 px-4 text-right">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">نوع الرسالة</label>
+                    <select name="type" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-3 px-4 text-right">
+                        <option value="support">طلب دعم فني</option>
+                        <option value="report">إبلاغ عن مشكلة</option>
+                        <option value="suggestion">اقتراح تحسين</option>
+                        <option value="game_request">طلب إضافة لعبة</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">الرسالة</label>
+                    <textarea name="message" rows="5" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-3 px-4 text-right" placeholder="اكتب رسالتك هنا..." required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 py-3 rounded-xl font-semibold">
+                    <i class="fas fa-paper-plane ml-2"></i>إرسال الرسالة
+                </button>
+            </form>
+        </div>
+
+        <div class="text-center">
+            <p class="text-gray-400 mb-3">أو تواصل معنا مباشرة عبر Instagram</p>
+            <a href="{{ instagram }}" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 rounded-xl font-semibold">
+                <i class="fab fa-instagram text-xl"></i>
+                @rokno_rokno
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

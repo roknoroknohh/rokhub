@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-8 text-center">تصفح الألعاب</h1>
+        
+        <!-- خيارات المنصة -->
+        <div class="bg-gray-800/50 rounded-xl p-4 mb-6">
+            <div class="flex flex-wrap gap-2 justify-center">
+                <a href="{{ url_for('games', platform='all') }}" class="px-6 py-3 rounded-full {% if current_platform == 'all' or not current_platform %}bg-blue-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %} font-semibold">
+                    <i class="fas fa-th-large ml-2"></i>الكل
+                </a>
+                <a href="{{ url_for('games', platform='pc') }}" class="px-6 py-3 rounded-full {% if current_platform == 'pc' %}bg-blue-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %} font-semibold">
+                    <i class="fas fa-desktop ml-2"></i>ألعاب الحاسوب
+                </a>
+                <a href="{{ url_for('games', platform='mobile') }}" class="px-6 py-3 rounded-full {% if current_platform == 'mobile' %}bg-blue-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %} font-semibold">
+                    <i class="fas fa-mobile-alt ml-2"></i>ألعاب الهاتف
+                </a>
+            </div>
+        </div>
+
+        <!-- الفئات -->
+        <div class="bg-gray-800/30 rounded-xl p-4 mb-8">
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ url_for('games', platform=current_platform) }}" class="px-4 py-2 rounded-full {% if not current_category %}bg-purple-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %} text-sm">الكل</a>
+                {% for cat in categories %}
+                <a href="{{ url_for('games', platform=current_platform, category=cat.id) }}" class="px-4 py-2 rounded-full {% if current_category == cat.id %}bg-purple-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %} text-sm">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- الألعاب -->
+        {% if games %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for game in games %}
+            <a href="{{ url_for('game_detail', game_id=game.id) }}" class="bg-gray-800 rounded-xl overflow-hidden hover:-translate-y-1 transition group">
+                <div class="relative">
+                    {% if game.cover_image %}
+                    <img src="{{ game.cover_image }}" class="w-full h-40 object-cover">
+                    {% else %}
+                    <div class="w-full h-40 bg-gray-700 flex items-center justify-center"><i class="fas fa-gamepad text-3xl text-gray-600"></i></div>
+                    {% endif %}
+                    <!-- شعار المنصة -->
+                    <div class="absolute top-2 left-2 flex gap-1">
+                        {% if game.platform == 'pc' or game.platform == 'both' %}
+                        <span class="bg-blue-500 text-xs px-2 py-1 rounded"><i class="fas fa-desktop"></i></span>
+                        {% endif %}
+                        {% if game.platform == 'mobile' or game.platform == 'both' %}
+                        <span class="bg-green-500 text-xs px-2 py-1 rounded"><i class="fas fa-mobile-alt"></i></span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="p-3">
+                    <h3 class="font-semibold truncate text-right">{{ game.title }}</h3>
+                    <p class="text-sm text-gray-500 text-right">{{ game.category.name if game.category else '' }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-gray-400 py-12">لا توجد ألعاب في هذا القسم</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

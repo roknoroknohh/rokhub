@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https:; font-src 'self' https:; script-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: http:;">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ settings.site_name }}{% endblock %}">
+    <meta property="og:description" content="{% block og_desc %}{{ settings.site_description }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}/static/images/og-image.png{% endblock %}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <title>{% block title %}{{ settings.site_name }}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body{font-family:'Cairo',sans-serif;background:#020617;color:#f3f4f6}
+        .sidebar{transform:translateX(100%);transition:transform 0.3s}
+        .sidebar.open{transform:translateX(0)}
+        .gradient-text{background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-gray-900/95 border-b border-gray-800 sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-gamepad text-xl text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold gradient-text">{{ settings.site_name }}</span>
+                </a>
+                
+                <div class="flex items-center gap-4">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('user_profile') }}" class="hidden md:flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-user"></i>
+                        <span>{{ current_user.username }}</span>
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('user_login') }}" class="hidden md:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>تسجيل الدخول</span>
+                    </a>
+                    {% endif %}
+                    
+                    <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-800 transition">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar fixed top-0 right-0 h-full w-80 bg-gray-900 border-l border-gray-800 z-50 p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold">القائمة</h2>
+            <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-800 rounded-lg">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- User Section -->
+        {% if current_user.is_authenticated %}
+        <div class="bg-gray-800 rounded-xl p-4 mb-6">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-xl"></i>
+                </div>
+                <div>
+                    <p class="font-bold">{{ current_user.username }}</p>
+                    <p class="text-sm text-gray-400">{{ current_user.email }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('user_profile') }}" class="block w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-center text-sm">
+                حسابي
+            </a>
+        </div>
+        {% else %}
+        <div class="bg-gray-800 rounded-xl p-4 mb-6">
+            <p class="text-gray-400 mb-3">ليس لديك حساب؟</p>
+            <a href="{{ url_for('user_login') }}" class="block w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-center mb-2">
+                تسجيل الدخول
+            </a>
+            <a href="{{ url_for('user_register') }}" class="block w-full bg-green-600 hover:bg-green-700 py-2 rounded-lg text-center">
+                إنشاء حساب جديد
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Menu Items -->
+        <div class="space-y-2">
+            <a href="{{ url_for('index') }}" class="block p-3 rounded-lg hover:bg-gray-800 transition">
+                <i class="fas fa-home ml-2"></i> الرئيسية
+            </a>
+            <a href="{{ url_for('games') }}" class="block p-3 rounded-lg hover:bg-gray-800 transition">
+                <i class="fas fa-gamepad ml-2"></i> الألعاب
+            </a>
+            <a href="{{ url_for('online_games') }}" class="block p-3 rounded-lg hover:bg-gray-800 transition">
+                <i class="fas fa-globe ml-2"></i> العب على الإنترنت
+            </a>
+            <a href="{{ url_for('support') }}" class="block p-3 rounded-lg hover:bg-gray-800 transition">
+                <i class="fas fa-headset ml-2"></i> الدعم والمساعدة
+            </a>
+        </div>
+
+        <div class="border-t border-gray-800 mt-6 pt-4">
+            <a href="{{ url_for('settings_page') }}" class="block p-3 rounded-lg hover:bg-gray-800 transition">
+                <i class="fas fa-cog ml-2"></i> الإعدادات
+            </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}" class="block p-3 rounded-lg hover:bg-gray-800 text-red-400 transition">
+                <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+            </a>
+            {% endif %}
+            <a href="{{ url_for('login') }}" class="block p-3 rounded-lg hover:bg-gray-800 text-yellow-400 transition">
+                <i class="fas fa-shield-alt ml-2"></i> دخول المالك
+            </a>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+                {% for category, message in messages %}
+                    <div class="p-4 rounded-xl mb-2 {% if category == 'success' %}bg-green-500/20 text-green-400{% elif category == 'danger' %}bg-red-500/20 text-red-400{% else %}bg-blue-500/20 text-blue-400{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="flex-grow">{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-16">
+        <!-- Main Footer -->
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-gamepad text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold gradient-text">{{ settings.site_name }}</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        {{ site_info.description }}
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="{{ instagram }}" target="_blank" class="w-10 h-10 bg-gray-800 hover:bg-pink-600 rounded-lg flex items-center justify-center transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-green-600 rounded-lg flex items-center justify-center transition">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">روابط سريعة</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{{ url_for('games') }}" class="hover:text-white transition">تصفح الألعاب</a></li>
+                        <li><a href="{{ url_for('online_games') }}" class="hover:text-white transition">ألعاب أونلاين</a></li>
+                        <li><a href="{{ url_for('support') }}" class="hover:text-white transition">الدعم الفني</a></li>
+                        <li><a href="{{ url_for('user_register') }}" class="hover:text-white transition">إنشاء حساب</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">قانوني</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{{ url_for('terms') }}" class="hover:text-white transition">شروط الخدمة</a></li>
+                        <li><a href="{{ url_for('privacy') }}" class="hover:text-white transition">سياسة الخصوصية</a></li>
+                        <li><a href="{{ url_for('dmca') }}" class="hover:text-white transition">DMCA</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h3 class="font-bold text-lg mb-4">تواصل معنا</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-envelope text-blue-500"></i>
+                            {{ site_info.email }}
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-blue-500"></i>
+                            {{ site_info.location }}
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-calendar text-blue-500"></i>
+                            تأسس عام {{ site_info.founded }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-800">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-500 text-sm">
+                    &copy; {{ site_info.founded }}-2024 {{ settings.site_name }}. جميع الحقوق محفوظة.
+                </p>
+                <p class="text-gray-600 text-xs">
+                    صنع بـ <i class="fas fa-heart text-red-500"></i> في الوطن العربي
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

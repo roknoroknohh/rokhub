@@ -1,0 +1,60 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_title %}{% if game %}تعديل لعبة{% else %}إضافة لعبة{% endif %}{% endblock %}
+{% block admin_content %}
+<form method="post" class="max-w-2xl">
+    <div class="bg-gray-800 rounded-xl p-6 space-y-4">
+        <div>
+            <label class="block text-gray-400 mb-2">عنوان اللعبة</label>
+            <input type="text" name="title" value="{{ game.title if game else '' }}" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" required>
+        </div>
+        
+        <div>
+            <label class="block text-gray-400 mb-2">المنصة</label>
+            <select name="platform" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">
+                <option value="both" {% if game and game.platform == 'both' %}selected{% endif %}>الحاسوب والهاتف</option>
+                <option value="pc" {% if game and game.platform == 'pc' %}selected{% endif %}>حاسوب فقط (PC)</option>
+                <option value="mobile" {% if game and game.platform == 'mobile' %}selected{% endif %}>هاتف فقط (Mobile)</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-gray-400 mb-2">الفئة</label>
+            <select name="category_id" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if game and game.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label class="block text-gray-400 mb-2">الوصف</label>
+            <textarea name="description" rows="3" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">{{ game.description if game else '' }}</textarea>
+        </div>
+        
+        <div>
+            <label class="block text-gray-400 mb-2">صورة الغلاف (رابط)</label>
+            <input type="url" name="cover_image" value="{{ game.cover_image if game else '' }}" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" placeholder="https://example.com/image.jpg">
+        </div>
+        
+        <div>
+            <label class="block text-gray-400 mb-2">رابط التحميل المباشر</label>
+            <input type="url" name="download_url" value="{{ game.download_url if game else '' }}" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" placeholder="https://your-server.com/game.apk">
+        </div>
+        
+        <div>
+            <label class="block text-gray-400 mb-2">رابط خارجي</label>
+            <input type="url" name="external_url" value="{{ game.external_url if game else '' }}" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" placeholder="https://mediafire.com/...">
+        </div>
+        
+        <div class="flex gap-3">
+            <label class="flex items-center gap-2"><input type="checkbox" name="is_active" {% if not game or game.is_active %}checked{% endif %}> نشط</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="is_featured" {% if game and game.is_featured %}checked{% endif %}> مميز</label>
+        </div>
+        
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg">حفظ</button>
+            <a href="{{ url_for('admin_games') }}" class="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded-lg">إلغاء</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_page_title %}سجل الأخطاء{% endblock %}
+{% block admin_title %}سجل الأخطاء{% endblock %}
+{% block admin_content %}
+
+<div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+    <table class="w-full">
+        <thead class="bg-gray-900/50">
+            <tr>
+                <th class="p-4 text-right">التاريخ</th>
+                <th class="p-4 text-right">النوع</th>
+                <th class="p-4 text-right">الوصف</th>
+                <th class="p-4 text-right">المسار</th>
+                <th class="p-4 text-right">الحالة</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for error in errors %}
+            <tr class="border-t border-gray-700 {% if not error.is_resolved %}bg-red-500/10{% endif %}">
+                <td class="p-4 text-sm text-gray-400">{{ error.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td class="p-4">
+                    <span class="bg-gray-700 px-2 py-1 rounded text-xs">{{ error.error_type }}</span>
+                </td>
+                <td class="p-4 max-w-xs">
+                    <p class="text-sm truncate" title="{{ error.error_message }}">{{ error.error_message }}</p>
+                </td>
+                <td class="p-4 text-sm text-gray-500">{{ error.route }}</td>
+                <td class="p-4">
+                    {% if error.is_resolved %}
+                    <span class="text-green-400"><i class="fas fa-check"></i> محلول</span>
+                    {% else %}
+                    <form method="post" action="{{ url_for('admin_resolve_error', error_id=error.id) }}" class="inline">
+                        <button type="submit" class="text-yellow-400 hover:text-yellow-300 text-sm">
+                            <i class="fas fa-check-circle"></i> تحديد كمحلول
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}تسجيل الدخول - {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="py-12 min-h-screen flex items-center">
+    <div class="max-w-md mx-auto px-4 w-full">
+        <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user text-3xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold">تسجيل الدخول</h1>
+                <p class="text-gray-400 mt-2">أهلاً بعودتك!</p>
+            </div>
+
+            <form method="post" class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-2 text-sm">اسم المستخدم أو البريد</label>
+                    <input type="text" name="username" required class="w-full bg-gray-900 border border-gray-700 rounded-xl py-3 px-4 text-right focus:border-blue-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2 text-sm">كلمة المرور</label>
+                    <input type="password" name="password" required class="w-full bg-gray-900 border border-gray-700 rounded-xl py-3 px-4 text-right focus:border-blue-500 focus:outline-none transition">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-bold transition">
+                    <i class="fas fa-sign-in-alt ml-2"></i> دخول
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm">
+                    ليس لديك حساب؟ 
+                    <a href="{{ url_for('user_register') }}" class="text-blue-400 hover:text-blue-300">سجل الآن</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

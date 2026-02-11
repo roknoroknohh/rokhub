@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="py-20 text-center">
+    <div class="max-w-3xl mx-auto px-4">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">ROKhub</h1>
+        <p class="text-xl text-gray-400 mb-8">أفضل منصة ألعاب رقمية</p>
+        <div class="flex gap-4 justify-center">
+            <a href="{{ url_for('games') }}" class="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-xl font-semibold">تصفح الألعاب</a>
+            <a href="{{ url_for('search') }}" class="bg-gray-700 hover:bg-gray-600 px-8 py-4 rounded-xl font-semibold">بحث</a>
+        </div>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-900/50">
+    <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-8 text-center">الفئات</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for cat in categories %}
+            <a href="{{ url_for('games', category=cat.id) }}" class="bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3" style="background:{{ cat.color }}20;color:{{ cat.color }}">
+                    <i class="fas fa-{{ cat.icon }}"></i>
+                </div>
+                <h3 class="font-semibold">{{ cat.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% if featured_games %}
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-8">ألعاب مميزة</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for game in featured_games %}
+            <div class="bg-gray-800 rounded-xl overflow-hidden hover:-translate-y-1 transition">
+                <a href="{{ url_for('game_detail', game_id=game.id) }}">
+                    {% if game.cover_image %}
+                    <img src="{{ game.cover_image }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-700 flex items-center justify-center"><i class="fas fa-gamepad text-4xl text-gray-600"></i></div>
+                    {% endif %}
+                </a>
+                <div class="p-4">
+                    <h3 class="font-bold text-lg mb-2">{{ game.title }}</h3>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span><i class="fas fa-download mr-1"></i>{{ game.download_count }}</span>
+                        <span>{{ game.category.name if game.category else '' }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

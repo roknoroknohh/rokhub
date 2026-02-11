@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_page_title %}رسائل الدعم{% endblock %}
+{% block admin_title %}رسائل الدعم{% endblock %}
+{% block admin_content %}
+
+<div class="space-y-4">
+    {% for msg in messages %}
+    <div class="bg-gray-800 rounded-xl p-6 border {% if not msg.is_read %}border-blue-500/50{% else %}border-gray-700{% endif %}">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="font-bold text-lg">{{ msg.name }}</h3>
+                <p class="text-sm text-gray-500">{{ msg.email or 'لا يوجد بريد' }} | {{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+            <div class="flex gap-2">
+                {% if msg.msg_type == 'support' %}<span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-sm">دعم فني</span>
+                {% elif msg.msg_type == 'report' %}<span class="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm">إبلاغ</span>
+                {% elif msg.msg_type == 'suggestion' %}<span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">اقتراح</span>
+                {% elif msg.msg_type == 'game_request' %}<span class="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-sm">طلب لعبة</span>
+                {% endif %}
+                
+                {% if msg.is_resolved %}
+                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm"><i class="fas fa-check"></i> تم الرد</span>
+                {% else %}
+                <span class="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm">بانتظار الرد</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="bg-gray-900/50 rounded-lg p-4 mb-4">
+            <p class="text-gray-300">{{ msg.message }}</p>
+        </div>
+        
+        {% if msg.admin_reply %}
+        <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-4">
+            <p class="text-green-400 text-sm mb-2"><i class="fas fa-reply ml-2"></i> رد الإدارة:</p>
+            <p class="text-gray-300">{{ msg.admin_reply }}</p>
+        </div>
+        {% endif %}
+        
+        {% if not msg.is_resolved %}
+        <form method="post" action="{{ url_for('admin_reply_message', msg_id=msg.id) }}" class="mt-4">
+            <textarea name="reply" rows="3" placeholder="اكتب ردك هنا..." class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right mb-2" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">
+                <i class="fas fa-paper-plane ml-2"></i> إرسال الرد
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

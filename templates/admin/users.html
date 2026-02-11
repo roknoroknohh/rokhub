@@ -1,0 +1,35 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_title %}المستخدمين{% endblock %}
+{% block admin_content %}
+<div class="bg-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-900/50">
+            <tr><th class="p-4 text-right">المستخدم</th><th class="p-4 text-right">البريد</th><th class="p-4 text-right">الإجراءات</th></tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="border-t border-gray-700">
+                <td class="p-4">{{ user.username }}</td>
+                <td class="p-4">{{ user.email }}</td>
+                <td class="p-4">
+                    {% if user.id != current_user.id %}
+                    <form method="post" action="/admin/user/delete/{{ user.id }}" class="inline" onsubmit="return confirm('حذف المستخدم؟')">
+                        <button type="submit" class="text-red-400">حذف</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="mt-8 bg-gray-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">إضافة مستخدم</h3>
+    <form method="post" action="{{ url_for('admin_add_user') }}" class="flex gap-4 flex-wrap">
+        <input type="text" name="username" placeholder="اسم المستخدم" class="bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" required>
+        <input type="email" name="email" placeholder="البريد" class="bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" required>
+        <input type="password" name="password" placeholder="كلمة المرور" class="bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" required>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">إضافة</button>
+    </form>
+</div>
+{% endblock %}

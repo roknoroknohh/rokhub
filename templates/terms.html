@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}شروط الخدمة - {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="py-12">
+    <div class="max-w-3xl mx-auto px-4">
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <h1 class="text-3xl font-bold mb-8 text-center">شروط الخدمة</h1>
+            
+            <div class="prose prose-invert max-w-none">
+                <div class="bg-gray-900/50 rounded-xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 text-blue-400">1. مقدمة</h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        مرحباً بك في {{ settings.site_name }}. باستخدامك للموقع، فإنك توافق على الالتزام بهذه الشروط. إذا كنت لا توافق على أي جزء من هذه الشروط، يرجى عدم استخدام الموقع.
+                    </p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 text-blue-400">2. استخدام الموقع</h2>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>الموقع مخصص للألعاب القانونية والمرخصة فقط</li>
+                        <li>يمنع استخدام الموقع لأي أغراض غير قانونية</li>
+                        <li>يمنع محاولة اختراق الموقع أو إلحاق الضرر به</li>
+                        <li>يمنع نشر أي محتوى غير لائق أو مسيء</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 text-blue-400">3. حسابات المستخدمين</h2>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>أنت مسؤول عن الحفاظ على سرية بيانات حسابك</li>
+                        <li>يجب أن يكون عمرك 13 عاماً على الأقل لإنشاء حساب</li>
+                        <li>نحتفظ بحق تعليق أو حذف أي حساب مخالف</li>
+                        <li>البيانات الشخصية محمية وفق سياسة الخصوصية</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 text-blue-400">4. الملكية الفكرية</h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        جميع الألعاب والمحتويات المنشورة على الموقع هي ملك لأصحابها. نحن لا نملك حقوق هذه الألعاب ونقدمها كخدمة توجيه فقط.
+                    </p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6">
+                    <h2 class="text-xl font-bold mb-4 text-blue-400">5. التعديلات</h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        نحتفظ بحق تعديل هذه الشروط في أي وقت. سيتم إخطار المستخدمين بأي تغييرات جوهرية.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <p class="text-gray-400 text-sm">آخر تحديث: 2024</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

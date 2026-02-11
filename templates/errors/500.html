@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}خطأ في الخادم - {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="py-20 text-center">
+    <div class="max-w-md mx-auto px-4">
+        <div class="text-8xl mb-6">🔧</div>
+        <h1 class="text-4xl font-bold mb-4">500</h1>
+        <p class="text-xl text-gray-400 mb-4">حدث خطأ في الخادم</p>
+        <p class="text-sm text-gray-500 mb-8">تم تسجيل الخطأ تلقائياً وسيتم إصلاحه قريباً</p>
+        <div class="space-y-3">
+            <button onclick="location.reload()" class="block w-full bg-blue-500 hover:bg-blue-600 py-3 rounded-xl font-semibold">
+                <i class="fas fa-sync ml-2"></i> إعادة المحاولة
+            </button>
+            <a href="{{ url_for('support') }}" class="block bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-semibold">
+                <i class="fas fa-envelope ml-2"></i> الإبلاغ عن المشكلة
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

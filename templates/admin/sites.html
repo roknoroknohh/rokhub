@@ -1,0 +1,37 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_title %}مواقع الألعاب{% endblock %}
+{% block admin_content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    {% for site in sites %}
+    <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+        <div class="h-32 bg-gray-700 relative flex items-center justify-center">
+            {% if site.image_url %}
+            <img src="{{ site.image_url }}" class="h-full w-full object-contain p-2 bg-white">
+            {% else %}
+            <i class="fas fa-globe text-4xl text-gray-600"></i>
+            {% endif %}
+        </div>
+        <div class="p-4">
+            <h3 class="font-bold mb-1">{{ site.name }}</h3>
+            <p class="text-sm text-gray-500 truncate mb-3">{{ site.url }}</p>
+            <form method="post" action="{{ url_for('admin_delete_site', site_id=site.id) }}" onsubmit="return confirm('حذف الموقع؟')">
+                <button type="submit" class="text-red-400 text-sm hover:text-red-300"><i class="fas fa-trash"></i> حذف</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <h3 class="font-semibold mb-4 text-lg">➕ إضافة موقع جديد</h3>
+    <form method="post" action="{{ url_for('admin_add_site') }}" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" name="name" placeholder="اسم الموقع (مثال: Y8 Games)" class="bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" required>
+            <input type="url" name="url" placeholder="رابط الموقع (https://...)" class="bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right" required>
+        </div>
+        <input type="url" name="image_url" placeholder="رابط شعار الموقع (صورة)" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">
+        <input type="text" name="description" placeholder="وصف قصير (اختياري)" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg font-semibold"><i class="fas fa-plus"></i> إضافة موقع</button>
+    </form>
+</div>
+{% endblock %}

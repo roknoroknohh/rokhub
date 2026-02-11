@@ -1,0 +1,29 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_title %}الألعاب{% endblock %}
+{% block admin_content %}
+<div class="flex justify-between mb-6">
+    <a href="{{ url_for('admin_add_game') }}" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">+ إضافة لعبة</a>
+</div>
+<div class="bg-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-900/50">
+            <tr><th class="p-4 text-right">اللعبة</th><th class="p-4 text-right">الفئة</th><th class="p-4 text-right">التحميلات</th><th class="p-4 text-right">الإجراءات</th></tr>
+        </thead>
+        <tbody>
+            {% for game in games %}
+            <tr class="border-t border-gray-700">
+                <td class="p-4">{{ game.title }}</td>
+                <td class="p-4">{{ game.category.name if game.category else '-' }}</td>
+                <td class="p-4">{{ game.download_count }}</td>
+                <td class="p-4">
+                    <a href="{{ url_for('admin_edit_game', game_id=game.id) }}" class="text-blue-400 mr-3">تعديل</a>
+                    <form method="post" action="{{ url_for('admin_delete_game', game_id=game.id) }}" class="inline" onsubmit="return confirm('حذف اللعبة؟')">
+                        <button type="submit" class="text-red-400">حذف</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

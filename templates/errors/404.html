@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}الصفحة غير موجودة - {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="py-20 text-center">
+    <div class="max-w-md mx-auto px-4">
+        <div class="text-8xl mb-6">🔍</div>
+        <h1 class="text-4xl font-bold mb-4">404</h1>
+        <p class="text-xl text-gray-400 mb-8">الصفحة التي تبحث عنها غير موجودة</p>
+        <div class="space-y-3">
+            <a href="{{ url_for('index') }}" class="block bg-blue-500 hover:bg-blue-600 py-3 rounded-xl font-semibold">
+                <i class="fas fa-home ml-2"></i> العودة للرئيسية
+            </a>
+            <button onclick="location.reload()" class="block w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-semibold">
+                <i class="fas fa-sync ml-2"></i> إعادة تحميل الصفحة
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

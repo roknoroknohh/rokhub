@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}سياسة الخصوصية - {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="py-12">
+    <div class="max-w-3xl mx-auto px-4">
+        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <h1 class="text-3xl font-bold mb-8 text-center">سياسة الخصوصية</h1>
+            
+            <div class="space-y-6">
+                <div class="bg-gray-900/50 rounded-xl p-6">
+                    <h2 class="text-xl font-bold mb-4 text-green-400">البيانات التي نجمعها</h2>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>اسم المستخدم والبريد الإلكتروني</li>
+                        <li>سجل الألعاب التي تتصفحها</li>
+                        <li>عنوان IP للأمان والتحليلات</li>
+                        <li>ملفات Cookies لتحسين التجربة</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6">
+                    <h2 class="text-xl font-bold mb-4 text-green-400">كيف نستخدم بياناتك</h2>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>تخصيص تجربتك على الموقع</li>
+                        <li>إرسال إشعارات مهمة فقط</li>
+                        <li>تحسين خدماتنا</li>
+                        <li>حماية الموقع من الاحتيال</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6">
+                    <h2 class="text-xl font-bold mb-4 text-green-400">حماية بياناتك</h2>
+                    <p class="text-gray-300 leading-relaxed">
+                        نستخدم تقنيات تشفير حديثة لحماية بياناتك. لا نشارك بياناتك مع أي طرف ثالث إلا بموافقتك أو بموجب القانون.
+                    </p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6">
+                    <h2 class="text-xl font-bold mb-4 text-green-400">حقوقك</h2>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>الحق في الوصول لبياناتك</li>
+                        <li>الحق في تعديل أو حذف بياناتك</li>
+                        <li>الحق في إلغاء حسابك في أي وقت</li>
+                        <li>الحق في الاعتراض على استخدام بياناتك</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <p class="text-gray-400 text-sm">للاستفسارات: {{ site_info.email }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

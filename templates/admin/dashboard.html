@@ -1,0 +1,83 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_page_title %}لوحة التحكم{% endblock %}
+{% block admin_title %}لوحة التحكم{% endblock %}
+{% block admin_content %}
+
+<!-- إحصائيات سريعة -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+        <p class="text-gray-400 text-sm"><i class="fas fa-gamepad ml-1"></i> الألعاب</p>
+        <p class="text-2xl font-bold">{{ stats.total_games }}</p>
+    </div>
+    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+        <p class="text-gray-400 text-sm"><i class="fas fa-download ml-1"></i> التحميلات</p>
+        <p class="text-2xl font-bold">{{ stats.total_downloads }}</p>
+    </div>
+    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+        <p class="text-gray-400 text-sm"><i class="fas fa-eye ml-1"></i> المشاهدات</p>
+        <p class="text-2xl font-bold">{{ stats.total_views }}</p>
+    </div>
+    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+        <p class="text-gray-400 text-sm"><i class="fas fa-tags ml-1"></i> الفئات</p>
+        <p class="text-2xl font-bold">{{ stats.categories }}</p>
+    </div>
+</div>
+
+<!-- تنبيهات -->
+{% if stats.unread_messages > 0 %}
+<div class="bg-blue-500/20 border border-blue-500/50 rounded-xl p-4 mb-6 flex justify-between items-center">
+    <div>
+        <p class="text-blue-400 font-semibold"><i class="fas fa-envelope ml-2"></i> رسائل جديدة</p>
+        <p class="text-sm text-gray-400">لديك {{ stats.unread_messages }} رسائل غير مقروءة</p>
+    </div>
+    <a href="{{ url_for('admin_messages') }}" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">عرض</a>
+</div>
+{% endif %}
+
+{% if stats.unresolved_errors > 0 %}
+<div class="bg-red-500/20 border border-red-500/50 rounded-xl p-4 mb-6 flex justify-between items-center">
+    <div>
+        <p class="text-red-400 font-semibold"><i class="fas fa-bug ml-2"></i> أخطاء غير محلولة</p>
+        <p class="text-sm text-gray-400">لديك {{ stats.unresolved_errors }} أخطاء تحتاج مراجعة</p>
+    </div>
+    <a href="{{ url_for('admin_errors') }}" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg">عرض</a>
+</div>
+{% endif %}
+
+<!-- إجراءات سريعة -->
+<div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
+    <h3 class="font-semibold mb-4"><i class="fas fa-bolt ml-2 text-yellow-400"></i> إجراءات سريعة</h3>
+    <div class="flex flex-wrap gap-3">
+        <a href="{{ url_for('admin_add_game') }}" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">
+            <i class="fas fa-plus ml-1"></i> إضافة لعبة
+        </a>
+        <a href="{{ url_for('admin_run_auto_fix') }}" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg">
+            <i class="fas fa-magic ml-1"></i> تشغيل الإصلاح التلقائي
+        </a>
+        <a href="{{ url_for('admin_errors') }}" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">
+            <i class="fas fa-bug ml-1"></i> سجل الأخطاء
+        </a>
+    </div>
+</div>
+
+<!-- آخر الإصلاحات التلقائية -->
+{% if stats.recent_auto_fixes %}
+<div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <h3 class="font-semibold mb-4"><i class="fas fa-history ml-2 text-green-400"></i> آخر الإصلاحات التلقائية</h3>
+    <div class="space-y-2">
+        {% for fix in stats.recent_auto_fixes %}
+        <div class="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg">
+            <div>
+                <p class="font-semibold text-sm">{{ fix.issue_type }}</p>
+                <p class="text-xs text-gray-500">{{ fix.description }}</p>
+            </div>
+            <span class="text-xs {% if fix.success %}text-green-400{% else %}text-red-400{% endif %}">
+                {% if fix.success %}✅ نجح{% else %}❌ فشل{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

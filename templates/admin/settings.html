@@ -1,0 +1,17 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_title %}الإعدادات{% endblock %}
+{% block admin_content %}
+<form method="post" class="max-w-xl">
+    <div class="bg-gray-800 rounded-xl p-6 space-y-4">
+        <div>
+            <label class="block text-gray-400 mb-2">اسم الموقع</label>
+            <input type="text" name="site_name" value="{{ settings.site_name }}" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">
+        </div>
+        <div>
+            <label class="block text-gray-400 mb-2">وصف الموقع</label>
+            <textarea name="site_description" rows="3" class="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 px-4 text-right">{{ settings.site_description }}</textarea>
+        </div>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg">حفظ</button>
+    </div>
+</form>
+{% endblock %}

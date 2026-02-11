@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}طلبات كثيرة - {{ settings.site_name }}{% endblock %}
+{% block content %}
+<section class="py-20 text-center">
+    <div class="max-w-md mx-auto px-4">
+        <div class="text-8xl mb-6">⏳</div>
+        <h1 class="text-4xl font-bold mb-4">429</h1>
+        <p class="text-xl text-gray-400 mb-8">طلبات كثيرة جداً. يرجى الانتظار قليلاً...</p>
+        <div class="bg-gray-800 rounded-xl p-4 mb-6">
+            <p class="text-gray-400">سيتم إعادة التوجيه تلقائياً بعد <span id="countdown">30</span> ثانية</p>
+        </div>
+        <button onclick="location.reload()" class="block w-full bg-blue-500 hover:bg-blue-600 py-3 rounded-xl font-semibold">
+            <i class="fas fa-sync ml-2"></i> إعادة المحاولة الآن
+        </button>
+    </div>
+</section>
+<script>
+    let seconds = 30;
+    const countdown = setInterval(() => {
+        seconds--;
+        document.getElementById('countdown').textContent = seconds;
+        if (seconds <= 0) {
+            clearInterval(countdown);
+            location.reload();
+        }
+    }, 1000);
+</script>
+{% endblock %}
