@@ -175,3 +175,5 @@
 2026-02-11 21:59:48,552 - werkzeug - INFO -  * Debugger PIN: 326-766-823
 2026-02-11 22:02:38,121 - utils - ERROR - Error logged: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again. at None
 2026-02-11 22:02:38,295 - werkzeug - INFO - 41.109.135.114 - - [11/Feb/2026 22:02:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-11 23:30:30,850 - werkzeug - INFO -  * Detected change in '/data/data/com.termux/files/home/gamehub/utils.py', reloading
+2026-02-11 23:30:32,170 - werkzeug - INFO -  * Restarting with stat
