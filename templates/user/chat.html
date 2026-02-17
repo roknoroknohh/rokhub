@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}محادثة الدعم - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">💬 محادثة الدعم</h5>
+                        <small>{{ contact_msg.msg_type|upper }} #{{ contact_msg.id }}</small>
+                    </div>
+                    <a href="{{ url_for('user_messages') }}" class="btn btn-light btn-sm">↩️ رجوع</a>
+                </div>
+                
+                <div class="card-body chat-container" style="height: 400px; overflow-y: auto; background: #f8f9fa;">
+                    <!-- الرسالة الأصلية -->
+                    <div class="message mb-3">
+                        <div class="d-flex justify-content-end">
+                            <div class="bg-primary text-white p-3 rounded-3" style="max-width: 80%;">
+                                <small class="d-block mb-1 opacity-75">أنت - {{ contact_msg.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                <p class="mb-0">{{ contact_msg.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- رد الأدمن الأول (إذا وجد) -->
+                    {% if contact_msg.admin_reply %}
+                    <div class="message mb-3">
+                        <div class="d-flex justify-content-start">
+                            <div class="bg-success text-white p-3 rounded-3" style="max-width: 80%;">
+                                <small class="d-block mb-1 opacity-75">👨‍💼 الدعم - {{ contact_msg.resolved_at.strftime('%Y-%m-%d %H:%M') if contact_msg.resolved_at else 'Unknown' }}</small>
+                                <p class="mb-0">{{ contact_msg.admin_reply }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- رسائل المحادثة -->
+                    {% for msg in messages %}
+                    <div class="message mb-3">
+                        {% if msg.sender_type == 'user' %}
+                        <div class="d-flex justify-content-end">
+                            <div class="bg-primary text-white p-3 rounded-3" style="max-width: 80%;">
+                                <small class="d-block mb-1 opacity-75">أنت - {{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                <p class="mb-0">{{ msg.message }}</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="d-flex justify-content-start">
+                            <div class="bg-success text-white p-3 rounded-3" style="max-width: 80%;">
+                                <small class="d-block mb-1 opacity-75">👨‍💼 الدعم - {{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                <p class="mb-0">{{ msg.message }}</p>
+                                {% if not msg.is_read %}
+                                <small class="d-block mt-1 opacity-75">✓✓</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="card-footer bg-white">
+                    <form action="{{ url_for('user_reply_to_admin', msg_id=contact_msg.id) }}" method="POST" class="d-flex gap-2">
+                        <input type="text" name="reply" class="form-control" placeholder="اكتب ردك هنا..." required autocomplete="off">
+                        <button type="submit" class="btn btn-primary">
+                            📤 إرسال
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-container::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.chat-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+.message {
+    animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+// تمرير تلقائي للأسفل
+document.querySelector('.chat-container').scrollTop = document.querySelector('.chat-container').scrollHeight;
+</script>
+{% endblock %}

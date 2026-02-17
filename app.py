@@ -1,43 +1,71 @@
 import os
+import sys
 import logging
-logger = logging.getLogger(__name__)
-
-import logging
-logger = logging.getLogger(__name__)
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, g
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
+from flask_compress import Compress
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash
 
-from models import db, User, Game, Category, ContactMessage, GameSite, ErrorLog, SiteSettings
-from utils import get_settings, get_lang, log_error, auto_fix_common_issues, init_database, check_url_health
+from models import db, User, Game, Category, ContactMessage, GameSite, ErrorLog, SiteSettings, Notification, ChatMessage
+from utils import get_settings, get_lang, log_error, auto_fix_common_issues, init_database, check_url_health, advanced_auto_fix, notify_admin_of_errors
 from config import (ADMIN_PASSWORD, INSTAGRAM_LINK, LANGUAGES, 
     SITE_INFO, TERMS_OF_SERVICE, PRIVACY_POLICY)
 
+# إعداد الـ Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
 # إنشاء التطبيق
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(32)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///rokhub.db'
+
+# مفتاح سري ثابت (يجب تغييره في الإنتاج)
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-super-secret-key-change-this-in-production-2024'
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///rokhub.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['SESSION_COOKIE_SECURE'] = False  # True في HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
+
+# ضغط الاستجابات
+Compress(app)
 
 # الأمان
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-Talisman(app, force_https=False, strict_transport_security=True,
+
+# Talisman - الأمان (تعطيل في التطوير، تفعيل في الإنتاج)
+is_production = os.environ.get('FLASK_ENV') == 'production'
+Talisman(app, 
+         force_https=is_production,
+         strict_transport_security=is_production,
          content_security_policy={
              'default-src': "'self'",
-             'style-src': ["'self'", "'unsafe-inline'", "https:", "http:"],
-             'font-src': ["'self'", "https:", "http:"],
-             'script-src': ["'self'", "'unsafe-inline'", "https:", "http:"],
-             'img-src': ["'self'", "data:", "https:", "http:"]
-         })
+             'style-src': ["'self'", "'unsafe-inline'", "https:", "http:", "cdn.tailwindcss.com", "fonts.googleapis.com"],
+             'font-src': ["'self'", "https:", "http:", "fonts.gstatic.com"],
+             'script-src': ["'self'", "'unsafe-inline'", "https:", "http:", "cdn.tailwindcss.com", "cdnjs.cloudflare.com"],
+             'img-src': ["'self'", "data:", "https:", "http:", "upload.wikimedia.org"],
+             'connect-src': ["'self'"]
+         } if is_production else None)
 
 limiter = Limiter(app=app, key_func=get_remote_address,
-                  default_limits=["200 per day", "50 per hour"])
+                  default_limits=["200 per day", "50 per hour"],
+                  storage_uri="memory://")
+
+
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -76,6 +104,8 @@ def inject_globals():
 def before_request():
     if not hasattr(g, 'auto_fix_ran'):
         auto_fix_common_issues()
+        advanced_auto_fix()
+        notify_admin_of_errors()
         g.auto_fix_ran = True
     
     settings = get_settings()
@@ -174,7 +204,8 @@ def support():
             name=request.form.get('name', ''),
             email=request.form.get('email', ''),
             msg_type=request.form.get('type', 'support'),
-            message=request.form.get('message', '')
+            message=request.form.get('message', ''),
+            user_id=current_user.id if current_user.is_authenticated else None
         )
         db.session.add(msg)
         db.session.commit()
@@ -387,12 +418,21 @@ def admin_messages():
 @login_required
 def admin_reply_message(msg_id):
     msg = ContactMessage.query.get_or_404(msg_id)
-    msg.admin_reply = request.form.get('reply')
+    reply_text = request.form.get('reply')
+    msg.admin_reply = reply_text
     msg.is_resolved = True
     msg.resolved_at = datetime.utcnow()
     msg.resolved_by = current_user.id
     db.session.commit()
-    flash('تم الرد', 'success')
+    
+    # حفظ إشعار في الجلسة ليظهر للمستخدم عند دخوله
+    if msg.user_id:
+        # تخزين في جدول مؤقت للإشعارات الفورية
+        from flask import session
+        # سنستخدم طريقة أبسط: تخزين في session للمستخدم
+        pass  # سنعتمد على flash messages في الصفحة التالية
+    
+    flash('✅ تم الرد على الرسالة بنجاح! سيتلقى المستخدم إشعاراً عند دخوله للموقع', 'success')
     return redirect(url_for('admin_messages'))
 
 @app.route('/admin/errors')
@@ -438,6 +478,7 @@ def admin_delete_site(site_id):
 @login_required
 def admin_run_auto_fix():
     fixes = auto_fix_common_issues()
+    notify_admin_of_errors()
     flash(f'تم إصلاح {len(fixes)} مشكلة', 'success')
     return redirect(url_for('admin_dashboard'))
 
@@ -478,7 +519,7 @@ def user_login():
         if user and user.check_password(password):
             if not user.is_active:
                 flash('الحساب معطل. تواصل مع الدعم', 'danger')
-                return render_template('user/login.html')
+                return render_template('user/login.html', settings=get_settings())
             
             user.last_login = datetime.utcnow()
             db.session.commit()
@@ -505,16 +546,16 @@ def user_register():
         # التحقق من الموافقة على الشروط
         if not accept_terms:
             flash('يجب الموافقة على شروط الخدمة', 'danger')
-            return render_template('user/register.html')
+            return render_template('user/register.html', settings=get_settings())
         
         # التحقق من عدم التكرار
         if User.query.filter_by(username=username).first():
             flash('اسم المستخدم موجود مسبقاً', 'danger')
-            return render_template('user/register.html')
+            return render_template('user/register.html', settings=get_settings())
         
         if User.query.filter_by(email=email).first():
             flash('البريد الإلكتروني مستخدم مسبقاً', 'danger')
-            return render_template('user/register.html')
+            return render_template('user/register.html', settings=get_settings())
         
         # إنشاء المستخدم
         user = User(
@@ -530,8 +571,11 @@ def user_register():
         # إشعار للأدمن
         logger.info(f"New user registered: {username} ({email})")
         
-        flash('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', 'success')
-        return redirect(url_for('user_login'))
+        # تسجيل الدخول تلقائياً بعد إنشاء الحساب
+        login_user(user, remember=True)
+        session.permanent = True
+        flash(f'أهلاً بك {user.username}! تم إنشاء حسابك وتسجيل دخولك تلقائياً', 'success')
+        return redirect(url_for('index'))
     
     return render_template('user/register.html', settings=get_settings())
 
@@ -557,6 +601,181 @@ def dmca():
     """DMCA"""
     return render_template('dmca.html', settings=get_settings())
 
+
+
+@app.route('/api/check-replies')
+@login_required
+def check_new_replies():
+    """التحقق من وجود ردود جديدة على رسائل المستخدم"""
+    # البحث عن رسائل تم الرد عليها منذ آخر دخول
+    last_check = session.get('last_notification_check', datetime.utcnow() - timedelta(days=1))
+    
+    new_replies = ContactMessage.query.filter(
+        ContactMessage.user_id == current_user.id,
+        ContactMessage.is_resolved == True,
+        ContactMessage.resolved_at > last_check
+    ).count()
+    
+    session['last_notification_check'] = datetime.utcnow()
+    
+    return jsonify({
+        'has_new_reply': new_replies > 0,
+        'count': new_replies
+    })
+
+
+
+
+@app.route('/user/message/<int:msg_id>/reply', methods=['POST'])
+@login_required
+def user_reply_to_admin(msg_id):
+    """المستخدم يرد على رسالة الأدمن"""
+    msg = ContactMessage.query.get_or_404(msg_id)
+    
+    # التحقق أن الرسالة للمستخدم الحالي
+    if msg.user_id != current_user.id:
+        flash('غير مصرح', 'danger')
+        return redirect(url_for('index'))
+    
+    reply_text = request.form.get('reply', '').strip()
+    if reply_text:
+        chat_msg = ChatMessage(
+            contact_message_id=msg.id,
+            sender_id=current_user.id,
+            sender_type='user',
+            message=reply_text
+        )
+        db.session.add(chat_msg)
+        
+        # إعادة فتح الرسالة إذا كانت مغلقة
+        msg.is_resolved = False
+        
+        db.session.commit()
+        flash('تم إرسال ردك', 'success')
+    
+    return redirect(url_for('user_chat', msg_id=msg.id))
+
+@app.route('/user/chat/<int:msg_id>')
+@login_required
+def user_chat(msg_id):
+    """صفحة المحادثة الكاملة"""
+    msg = ContactMessage.query.get_or_404(msg_id)
+    
+    if msg.user_id != current_user.id:
+        flash('غير مصرح', 'danger')
+        return redirect(url_for('index'))
+    
+    # جلب جميع رسائل المحادثة
+    messages = ChatMessage.query.filter_by(contact_message_id=msg.id).order_by(ChatMessage.created_at.asc()).all()
+    
+    # تحديث حالة القراءة
+    for m in messages:
+        if m.sender_type == 'admin' and not m.is_read:
+            m.is_read = True
+    db.session.commit()
+    
+    return render_template('user/chat.html', contact_msg=msg, messages=messages)
+
+@app.route('/admin/chat/<int:msg_id>')
+@login_required
+def admin_chat_view(msg_id):
+    """الأدمن يرى المحادثة كاملة"""
+    msg = ContactMessage.query.get_or_404(msg_id)
+    messages = ChatMessage.query.filter_by(contact_message_id=msg.id).order_by(ChatMessage.created_at.asc()).all()
+    
+    # تحديث حالة القراءة
+    for m in messages:
+        if m.sender_type == 'user' and not m.is_read:
+            m.is_read = True
+    db.session.commit()
+    
+    return render_template('admin/chat_view.html', contact_msg=msg, messages=messages)
+
+@app.route('/admin/chat/<int:msg_id>/reply', methods=['POST'])
+@login_required
+def admin_chat_reply(msg_id):
+    """الأدمن يرد في المحادثة"""
+    msg = ContactMessage.query.get_or_404(msg_id)
+    
+    reply_text = request.form.get('reply', '').strip()
+    if reply_text:
+        chat_msg = ChatMessage(
+            contact_message_id=msg.id,
+            sender_id=current_user.id,
+            sender_type='admin',
+            message=reply_text
+        )
+        db.session.add(chat_msg)
+        db.session.commit()
+        
+        # إشعار للمستخدم
+        flash('تم إرسال ردك', 'success')
+    
+    return redirect(url_for('admin_chat_view', msg_id=msg.id))
+
+
+
+
+# ==================== SEO & Sitemap ====================
+
+@app.route('/robots.txt')
+def robots():
+    """ملف robots.txt"""
+    return """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /user/
+Disallow: /api/
+
+Sitemap: /sitemap.xml
+""", 200, {'Content-Type': 'text/plain'}
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """خريطة الموقع للـ SEO"""
+    from datetime import datetime
+    
+    pages = [
+        {'url': url_for('index', _external=True), 'priority': '1.0', 'changefreq': 'daily'},
+        {'url': url_for('games', _external=True), 'priority': '0.9', 'changefreq': 'daily'},
+        {'url': url_for('online_games', _external=True), 'priority': '0.8', 'changefreq': 'weekly'},
+        {'url': url_for('support', _external=True), 'priority': '0.5', 'changefreq': 'monthly'},
+        {'url': url_for('terms', _external=True), 'priority': '0.3', 'changefreq': 'monthly'},
+        {'url': url_for('privacy', _external=True), 'priority': '0.3', 'changefreq': 'monthly'},
+    ]
+    
+    # إضافة الألعاب
+    for game in Game.query.filter_by(is_active=True).all():
+        pages.append({
+            'url': url_for('game_detail', game_id=game.id, _external=True),
+            'priority': '0.7',
+            'changefreq': 'weekly'
+        })
+    
+    # إضافة الفئات
+    for cat in Category.query.filter_by(is_active=True).all():
+        pages.append({
+            'url': url_for('games', category=cat.id, _external=True),
+            'priority': '0.6',
+            'changefreq': 'weekly'
+        })
+    
+    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    
+    for page in pages:
+        sitemap_xml += '  <url>\n'
+        sitemap_xml += f'    <loc>{page["url"]}</loc>\n'
+        sitemap_xml += f'    <lastmod>{datetime.utcnow().strftime("%Y-%m-%d")}</lastmod>\n'
+        sitemap_xml += f'    <changefreq>{page["changefreq"]}</changefreq>\n'
+        sitemap_xml += f'    <priority>{page["priority"]}</priority>\n'
+        sitemap_xml += '  </url>\n'
+    
+    sitemap_xml += '</urlset>'
+    
+    return sitemap_xml, 200, {'Content-Type': 'application/xml'}
+
+# ==================== Main ====================
 
 if __name__ == '__main__':
     with app.app_context():

@@ -18,6 +18,12 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime)
     login_attempts = db.Column(db.Integer, default=0)
     locked_until = db.Column(db.DateTime)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
     
     sent_messages = db.relationship('ContactMessage', 
         foreign_keys='ContactMessage.user_id', 
@@ -106,3 +112,29 @@ class AutoFixLog(db.Model):
     action_taken = db.Column(db.Text)
     success = db.Column(db.Boolean)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    link = db.Column(db.String(500))
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref='notifications', lazy=True)
+
+
+class ChatMessage(db.Model):
+    __tablename__ = 'chat_messages'
+    id = db.Column(db.Integer, primary_key=True)
+    contact_message_id = db.Column(db.Integer, db.ForeignKey('contact_message.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    sender_type = db.Column(db.String(20), default='user')  # 'user' أو 'admin'
+    message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    contact = db.relationship('ContactMessage', backref='chat_messages', lazy=True)
+    sender = db.relationship('User', foreign_keys=[sender_id], lazy=True)

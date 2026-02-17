@@ -105,7 +105,12 @@ def init_database():
     from werkzeug.security import generate_password_hash
     
     db.create_all()
-    os.makedirs('/data/data/com.termux/files/home/gamehub/logs', exist_ok=True)
+    # إنشاء المجلدات اللازمة بشكل مرن
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.join(base_dir, 'logs')
+    uploads_dir = os.path.join(base_dir, 'uploads')
+    os.makedirs(logs_dir, exist_ok=True)
+    os.makedirs(uploads_dir, exist_ok=True)
     
     if not User.query.filter_by(username='admin').first():
         admin = User(username='admin', email='admin@rokhub.com', is_admin=True)
@@ -132,15 +137,108 @@ def init_database():
         db.session.add(SiteSettings())
     
     if not GameSite.query.first():
-        sites = [
-            GameSite(name='Y8 Games', url='https://www.y8.com',
-                     image_url='/static/images/y8-games.png',
-                     description='ألعاب فلاش وأونلاين مجانية', sort_order=1),
-            GameSite(name='Poki', url='https://poki.com',
-                     image_url='/static/images/poki.png',
-                     description='ألعاب مجانية للجميع', sort_order=2)
-        ]
+        from config import GAME_SITES
+        sites = []
+        for idx, site_data in enumerate(GAME_SITES[:5], 1):
+            sites.append(GameSite(
+                name=site_data['name'],
+                url=site_data['url'],
+                image_url=site_data.get('image', ''),
+                description=site_data.get('description', ''),
+                sort_order=idx
+            ))
         db.session.add_all(sites)
     
     db.session.commit()
     return True
+
+
+def advanced_auto_fix():
+    """نظام إصلاح الأخطاء التلقائي المتقدم"""
+    from flask import render_template_string
+    fixes = []
+    errors_found = []
+    
+    # 1. إصلاح الجداول المفقودة
+    try:
+        db.create_all()
+        fixes.append("✅ تم التحقق من جميع الجداول")
+    except Exception as e:
+        errors_found.append(f"خطأ في إنشاء الجداول: {str(e)}")
+    
+    # 2. إصلاح المستخدمين المقفلين
+    try:
+        locked_users = User.query.filter(
+            User.locked_until < datetime.utcnow(),
+            User.login_attempts > 0
+        ).all()
+        for user in locked_users:
+            user.login_attempts = 0
+            user.locked_until = None
+        if locked_users:
+            db.session.commit()
+            fixes.append(f"🔓 تم فك قفل {len(locked_users)} مستخدم")
+    except Exception as e:
+        errors_found.append(f"خطأ في فك القفل: {str(e)}")
+    
+    # 3. تنظيف الأخطاء القديمة
+    try:
+        old_errors = ErrorLog.query.filter(
+            ErrorLog.created_at < datetime.utcnow() - timedelta(days=30),
+            ErrorLog.is_resolved == True
+        ).all()
+        for error in old_errors:
+            db.session.delete(error)
+        if old_errors:
+            db.session.commit()
+            fixes.append(f"🧹 تم حذف {len(old_errors)} خطأ قديم")
+    except Exception as e:
+        errors_found.append(f"خطأ في التنظيف: {str(e)}")
+    
+    # 4. فحص صحة الروابط المعطلة
+    try:
+        broken_games = Game.query.filter_by(health_status='broken').limit(5).all()
+        for game in broken_games:
+            new_status = check_url_health(game.external_url) if game.external_url else 'unknown'
+            game.health_status = new_status
+            game.last_check = datetime.utcnow()
+        if broken_games:
+            db.session.commit()
+            fixes.append(f"🔗 تم فحص {len(broken_games)} لعبة معطلة")
+    except Exception as e:
+        errors_found.append(f"خطأ في فحص الروابط: {str(e)}")
+    
+    # 5. إنشاء إعدادات افتراضية إذا لم تكن موجودة
+    try:
+        if not SiteSettings.query.first():
+            db.session.add(SiteSettings())
+            db.session.commit()
+            fixes.append("⚙️ تم إنشاء الإعدادات الافتراضية")
+    except Exception as e:
+        errors_found.append(f"خطأ في الإعدادات: {str(e)}")
+    
+    # تسجيل النتائج
+    if fixes or errors_found:
+        log_entry = AutoFixLog(
+            issue_type='advanced_auto_fix',
+            description='; '.join(fixes) if fixes else 'No fixes needed',
+            action_taken='; '.join(errors_found) if errors_found else 'Success',
+            success=len(errors_found) == 0
+        )
+        db.session.add(log_entry)
+        db.session.commit()
+    
+    return {'fixes': fixes, 'errors': errors_found}
+
+def notify_admin_of_errors():
+    """إرسال إشعار للأدمن بالأخطاء الجديدة"""
+    recent_errors = ErrorLog.query.filter(
+        ErrorLog.is_resolved == False,
+        ErrorLog.created_at > datetime.utcnow() - timedelta(hours=1)
+    ).all()
+    
+    if recent_errors:
+        # يمكن إضافة إرسال بريد أو إشعار هنا
+        logger.warning(f"⚠️ {len(recent_errors)} أخطاء جديدة تحتاج اهتمامك في لوحة التحكم")
+        return len(recent_errors)
+    return 0

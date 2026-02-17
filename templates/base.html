@@ -24,7 +24,7 @@
         .gradient-text{background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body data-user-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}" class="min-h-screen flex flex-col">
     <!-- Navbar -->
     <nav class="bg-gray-900/95 border-b border-gray-800 sticky top-0 z-50 backdrop-blur">
         <div class="max-w-7xl mx-auto px-4">
@@ -235,5 +235,13 @@
             overlay.classList.toggle('hidden');
         }
     </script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/terms-popup.js') }}"></script>
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+
+<!-- زر العودة للأعلى -->
+<button id="scroll-to-top" class="fixed bottom-6 left-6 w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full shadow-lg flex items-center justify-center transition opacity-0 pointer-events-none z-40">
+    <i class="fas fa-arrow-up"></i>
+</button>
 </body>
 </html>

@@ -1,0 +1,37 @@
+import os
+
+# إنشاء أيقونة أكشن احترافية (سيف/درع)
+with open('static/images/action-icon.svg', 'w') as f:
+    f.write('''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <defs>
+        <linearGradient id="actionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- خلفية دائرية -->
+    <circle cx="50" cy="50" r="45" fill="url(#actionGrad)" />
+    
+    <!-- سيف متقاطع -->
+    <g transform="translate(50,50)" filter="url(#glow)">
+        <path d="M-15,-20 L0,0 L-15,20 M15,-20 L0,0 L15,20" 
+              stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <circle cx="0" cy="0" r="8" fill="white"/>
+    </g>
+    
+    <!-- تأثيرات إضافية -->
+    <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
+</svg>''')
+
+print("✅ تم إنشاء أيقونة أكشن احترافية")
+
+# تحديث قاعدة البيانات لتستخدم الأيقونة الجديدة
+print("✅ يمكنك الآن استخدام /static/images/action-icon.svg للأكشن")

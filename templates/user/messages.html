@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}رسائلي - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">📨 رسائلي وردود الدعم</h2>
+    
+    {% if messages %}
+        <div class="list-group">
+        {% for msg in messages %}
+            <div class="list-group-item {% if msg.admin_reply or msg.chat_messages|length > 0 %}list-group-item-success{% endif %} mb-3 rounded-3 shadow-sm">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="mb-1">{{ msg.msg_type|upper }} #{{ msg.id }}</h5>
+                        <p class="mb-1">{{ msg.message[:100] }}{% if msg.message|length > 100 %}...{% endif %}</p>
+                        <small class="text-muted">أرسلت في: {{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <div class="text-end">
+                        {% if msg.is_resolved and not msg.chat_messages|length > 0 %}
+                            <span class="badge bg-success mb-2">تم الرد</span>
+                        {% elif msg.chat_messages|length > 0 %}
+                            <span class="badge bg-info mb-2">محادثة نشطة</span>
+                        {% else %}
+                            <span class="badge bg-warning mb-2">قيد الانتظار</span>
+                        {% endif %}
+                        <br>
+                        <a href="{{ url_for('user_chat', msg_id=msg.id) }}" class="btn btn-sm btn-primary">
+                            💬 عرض المحادثة
+                        </a>
+                    </div>
+                </div>
+                
+                {% if msg.admin_reply and msg.chat_messages|length == 0 %}
+                <hr>
+                <div class="mt-3 bg-light p-3 rounded">
+                    <h6 class="text-primary">👨‍💼 رد الدعم:</h6>
+                    <p class="mb-1">{{ msg.admin_reply }}</p>
+                    <small class="text-muted">رد في: {{ msg.resolved_at.strftime('%Y-%m-%d %H:%M') if msg.resolved_at else 'Unknown' }}</small>
+                    <br><br>
+                    <a href="{{ url_for('user_chat', msg_id=msg.id) }}" class="btn btn-sm btn-success">
+                        ✍️ رد على الأدمن
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            لا توجد رسائل حالياً. <a href="{{ url_for('support') }}">أرسل رسالة جديدة</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

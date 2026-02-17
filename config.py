@@ -33,35 +33,35 @@ GAME_SITES = [
     {
         'name': 'Y8 Games',
         'url': 'https://www.y8.com',
-        'image': '/static/images/y8-games.png',
+        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Y8.com_logo.png/800px-Y8.com_logo.png',
         'description': 'ألعاب فلاش وأونلاين مجانية',
         'color': '#ef4444'
     },
     {
         'name': 'Poki',
         'url': 'https://poki.com',
-        'image': '/static/images/poki.png',
+        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Poki_logo.png/800px-Poki_logo.png',
         'description': 'ألعاب مجانية للجميع',
         'color': '#22c55e'
     },
     {
         'name': 'Crazy Games',
         'url': 'https://www.crazygames.com',
-        'image': '/static/images/crazy-games.png',
+        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1024px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png',
         'description': 'ألعاب مجنونة وممتعة',
         'color': '#a855f7'
     },
     {
         'name': 'Kizi',
         'url': 'https://kizi.com',
-        'image': '/static/images/kizi.png',
+        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Video_game_development_icon.svg/1024px-Video_game_development_icon.svg.png',
         'description': 'ألعاب أطفال وعائلية',
         'color': '#3b82f6'
     },
     {
         'name': 'Friv',
         'url': 'https://www.friv.com',
-        'image': '/static/images/friv.png',
+        'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gamepad_icon.svg/1024px-Gamepad_icon.svg.png',
         'description': 'ألعاب بسيطة وسريعة',
         'color': '#f59e0b'
     }
